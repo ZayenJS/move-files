@@ -1,4 +1,5 @@
 import { exit } from 'node:process';
+import path from 'path';
 import { FSController, FSControllerType } from './FSController';
 
 type MoveOptions = {
@@ -46,7 +47,27 @@ export class FSMoveController extends FSController implements FSControllerType<M
       exit(0);
     }
 
-    const result = await this.getFilePaths(this.source);
+    const filePaths = await this.findFilePathsByExtension(this.source);
+    const result = filePaths.reduce((acc, filePath) => {
+      const year = /\/(\d{4})\//.exec(filePath)?.[1];
+      const month = /\/(\d{2})\//.exec(filePath)?.[1];
+
+      let destinationPath = this.destination;
+
+      if (year) {
+        destinationPath += `/${year}`;
+      }
+
+      if (month) {
+        destinationPath += `/${month}`;
+      }
+
+      acc[filePath] = `${destinationPath}/${path.basename(filePath)}`;
+
+      return acc;
+    }, {} as Record<string, string>);
+
+    // const result = await this.getFilePaths(this.source);
 
     console.info('='.repeat(80));
     console.info(`Here are the files that ${options.dry ? 'would' : 'will'} be moved:`);
@@ -146,6 +167,39 @@ export class FSMoveController extends FSController implements FSControllerType<M
     }
 
     return result;
+  }
+
+  async findFilePathsByExtension(directoryPath: string): Promise<string[]> {
+    const fileExtension = this.options.type;
+    try {
+      const files = await this.fs.readdir(directoryPath);
+
+      const filteredFiles = await Promise.all(
+        files.map(async (file) => {
+          // ignore @eaDir
+          if (file.startsWith('@')) {
+            return null;
+          }
+          const filePath = path.join(directoryPath, file);
+          const fileStat = await this.fs.stat(filePath);
+
+          if (fileStat.isFile() && path.extname(file) === `.${fileExtension}`) {
+            return filePath;
+          } else if (fileStat.isDirectory()) {
+            // Recursive call for subdirectories
+            return this.findFilePathsByExtension(filePath);
+          } else {
+            return null;
+          }
+        }),
+      );
+
+      // Flatten the array and filter out null values
+      return filteredFiles.flat().filter((filePath) => filePath !== null) as string[];
+    } catch (error) {
+      console.error('Error reading directory:', (error as Error).message);
+      throw error;
+    }
   }
 
   private async getFilesForType(type: string) {
