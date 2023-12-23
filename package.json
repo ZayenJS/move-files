@@ -1,0 +1,21 @@
+{
+  "name": "move-files",
+  "version": "1.0.0",
+  "description": "",
+  "main": "out/main.js",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc -w",
+    "dev:start": "clear && ts-node src/main.ts",
+    "start": "node out/main.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "commander": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.5"
+  }
+}
