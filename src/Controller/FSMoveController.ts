@@ -1,4 +1,5 @@
 import { exit } from 'node:process';
+import shelljs from 'shelljs';
 import path from 'path';
 import { FSController, FSControllerType } from './FSController';
 
@@ -105,7 +106,7 @@ export class FSMoveController extends FSController implements FSControllerType<M
       }
 
       try {
-        await this.fs.rename(source, destination);
+        shelljs.mv(source, destination);
         console.info(`Moved ${source} to ${destination}`);
       } catch (e) {
         console.info(`Could not move ${source} to ${destination}`);
@@ -289,7 +290,7 @@ export class FSMoveController extends FSController implements FSControllerType<M
       }
 
       try {
-        await this.fs.rename(`${this.source}/${file}`, `${this.destination}/${file}`);
+        shelljs.mv(`${this.source}/${file}`, `${this.destination}/${file}`);
         console.info(`Moved ${file} to ${this.destination}`);
       } catch (e) {
         console.info(`Could not move ${file} to ${this.destination}`);
