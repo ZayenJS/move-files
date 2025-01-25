@@ -251,14 +251,15 @@ export class FSMoveController extends FSController implements FSControllerType<M
   }
 
   private async handleDestinationDoesNotExist(destination: string = '') {
-    const destinationExists = Boolean(await this.fs.stat(destination ?? this.destination).catch(() => false));
+    const _destination = destination ?? this.destination;
+    const destinationExists = Boolean(await this.fs.stat(_destination).catch(() => false));
 
     if (destinationExists) {
       return;
     }
 
     console.info();
-    const answer = await this.rl.question(`Destination folder ${this.destination} does not exist, create it? (y/n) `);
+    const answer = await this.rl.question(`Destination folder ${_destination} does not exist, create it? (y/n) `);
 
     if (answer !== 'y') {
       console.info('Aborting');
@@ -266,9 +267,9 @@ export class FSMoveController extends FSController implements FSControllerType<M
     }
 
     try {
-      await this.fs.mkdir(this.destination, { recursive: true });
+      await this.fs.mkdir(_destination, { recursive: true });
     } catch (e) {
-      console.info(`Could not create ${this.destination}`);
+      console.info(`Could not create ${_destination}`);
       console.error(e);
       exit(1);
     }
