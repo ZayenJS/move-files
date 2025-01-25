@@ -92,7 +92,7 @@ export class FSMoveController extends FSController implements FSControllerType<M
 
     for (const [source, destination] of Object.entries(result)) {
       const destinationFolder = destination.replace(/\/[^/]+$/, '');
-      this.handleDestinationDoesNotExist(destinationFolder);
+      await this.handleDestinationDoesNotExist(destinationFolder);
 
       const destinationFileExists = Boolean(await this.fs.stat(destination).catch(() => false));
 
